@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2000 - 2012 Samsung Electronics Co., Ltd All Rights Reserved 
+ *
+ * This file is part of <boot-animation>
+ * Written by <Seungtaek Chung> <seungtaek.chung@samsung.com>, <Mi-Ju Lee> <miju52.lee@samsung.com>, <Xi Zhichan> <zhichan.xi@samsung.com>
+ *
+ * PROPRIETARY/CONFIDENTIAL
+ *
+ * This software is the confidential and proprietary information of SAMSUNG ELECTRONICS ("Confidential Information").
+ * You shall not disclose such Confidential Information and shall use it only in accordance
+ * with the terms of the license agreement you entered into with SAMSUNG ELECTRONICS.
+ * SAMSUNG make no representations or warranties about the suitability of the software,
+ * either express or implied, including but not limited to the implied warranties of merchantability,
+ * fitness for a particular purpose, or non-infringement.
+ * SAMSUNG shall not be liable for any damages suffered by licensee as a result of using,
+ * modifying or distributing this software or its derivatives.
+ *
+ */
+
+images {
+#include "poweron_image.h"
+}
+
+collections {
+	group {
+		name: "poweron";
+
+		parts {
+			part {
+				name: "poweron";
+				mouse_events: 0;
+				description {
+					state: "default" 0.0;
+					image {
+#include "poweron_part.h"
+					}
+					visible: 1;
+				}
+			}
+		}
+
+		programs {
+			program {
+				name: "poweron";
+				signal: "show";
+				action: STATE_SET "default" 0.0;
+				target: "poweron";
+				transition: LINEAR 4;
+				after: "poweron_end";
+			}
+			program {
+				name: "poweron_end";
+				action: SIGNAL_EMIT "end" "animation";
+			}
+		}
+	}
+}
+
