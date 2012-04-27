@@ -170,7 +170,7 @@ void xready_cb(keynode_t * node, void *user_data)
 	}
 
 	init_animation(type, args->msg);
-	if (type == TYPE_OFF) {
+	if ((type == TYPE_OFF) || (type == TYPE_OFF_WITH_MSG)) {
 		if (!ASM_register_sound
 		    (-1, &asm_handle, ASM_EVENT_EXCLUSIVE_AVSYSTEM,
 		     ASM_STATE_PLAYING, NULL, NULL, ASM_RESOURCE_NONE,

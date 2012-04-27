@@ -1,5 +1,5 @@
 Name: boot-animation
-Version: 0.3.0
+Version: 0.3.1
 Release: 1
 Summary: Boot animation
 Source: %{name}-%{version}.tar.gz
