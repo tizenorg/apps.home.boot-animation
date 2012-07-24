@@ -4,7 +4,7 @@ Release: 1
 Summary: Boot animation
 Source: %{name}-%{version}.tar.gz
 Source1001: packaging/boot-animation.manifest 
-License:    Samsung Proprietary License
+License:    Flora Software License
 Group:    TO_BE/FILLED_IN
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires: cmake
