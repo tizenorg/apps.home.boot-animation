@@ -3,6 +3,7 @@ Version: 0.3.1
 Release: 1
 Summary: Boot animation
 Source: %{name}-%{version}.tar.gz
+Source1001: packaging/boot-animation.manifest 
 License:    Flora Software License
 Group:    TO_BE/FILLED_IN
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
@@ -31,6 +32,7 @@ Shows an animation and plays a sound when the device is booted or shutdown.
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
 
 %build
+cp %{SOURCE1001} .
 make %{?jobs:-j%jobs}
 
 %install
@@ -50,6 +52,7 @@ vconftool  -i set -t string memory/boot-animation/restart start:start
 
 
 %files
+%manifest boot-animation.manifest
 /etc/init.d/boot-ani
 /usr/share/edje/poweroff.edj
 /usr/share/edje/poweron.edj
