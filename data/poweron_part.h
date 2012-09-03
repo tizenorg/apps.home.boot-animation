@@ -59,5 +59,11 @@
  tween:"HD/power_on_720_1280/power_on_720_1280__00040.png";
  tween:"HD/power_on_720_1280/power_on_720_1280__00041.png";
  tween:"HD/power_on_720_1280/power_on_720_1280__00042.png";
- tween:"HD/power_on_720_1280/power_on_720_1280__00043.png"; 
+ tween:"HD/power_on_720_1280/power_on_720_1280__00043.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00044.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00045.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00046.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00047.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00048.png";
+ tween:"HD/power_on_720_1280/power_on_720_1280__00049.png";
  

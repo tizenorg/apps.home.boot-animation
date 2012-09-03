@@ -58,5 +58,11 @@
  image:"HD/power_on_720_1280/power_on_720_1280__00040.png" LOSSY 85;
  image:"HD/power_on_720_1280/power_on_720_1280__00041.png" LOSSY 85;
  image:"HD/power_on_720_1280/power_on_720_1280__00042.png" LOSSY 85;
- image:"HD/power_on_720_1280/power_on_720_1280__00043.png" LOSSY 85; 
+ image:"HD/power_on_720_1280/power_on_720_1280__00043.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00044.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00045.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00046.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00047.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00048.png" LOSSY 85;
+ image:"HD/power_on_720_1280/power_on_720_1280__00049.png" LOSSY 85;
 
