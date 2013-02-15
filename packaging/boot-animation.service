@@ -1,0 +1,10 @@
+[Unit]
+Description=Boot Animation
+After=xorg.target e17.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/boot-animation --start
+
+[Install]
+WantedBy=core-efl.target
