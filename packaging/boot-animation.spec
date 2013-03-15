@@ -6,7 +6,7 @@ Source: %{name}-%{version}.tar.gz
 Source101: boot-animation.service
 Source1001: packaging/boot-animation.manifest 
 License:    Flora Software License
-Group:    apps/home
+Group:    TO_BE/FILLED_IN
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires: cmake
 BuildRequires: edje, edje-bin, embryo, embryo-bin
@@ -28,6 +28,7 @@ Shows an animation and plays a sound when the device is booted or shutdown.
 
 %prep
 %setup -q
+#%patch0 -p1
 
 
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
