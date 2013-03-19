@@ -6,7 +6,7 @@ Source: %{name}-%{version}.tar.gz
 Source101: boot-animation.service
 Source1001: packaging/boot-animation.manifest 
 License:    Flora Software License
-Group:    TO_BE/FILLED_IN
+Group: Samsung/Application
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires: cmake
 BuildRequires: edje, edje-bin, embryo, embryo-bin
