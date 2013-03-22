@@ -57,7 +57,7 @@ make clean
 ln -s /etc/init.d/boot-ani /etc/rc.d/rc3.d/S41boot-ani
 /usr/bin/systemctl daemon-reload
 vconftool  -i set -t string memory/boot-animation/restart start:start
-vconftool  -i set -t int memory/boot_animation/finished 0
+vconftool  -i set -t int memory/boot-animation/finished 0
 
 %files
 %manifest boot-animation.manifest
