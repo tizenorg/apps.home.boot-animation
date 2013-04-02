@@ -247,6 +247,11 @@ int main(int argc, char *argv[])
 	args.argv = argv;
 	args.msg = NULL;
 
+	if (ecore_x_init(NULL) == NULL) {
+		fprintf(stderr, "Cannot connect to X11 display\n");
+		return 0;
+	}
+
 	elm_init(argc, argv);
 
 	vconf_notify_key_changed("memory/boot-animation/restart", restart_cb,
