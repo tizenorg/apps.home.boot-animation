@@ -70,7 +70,8 @@ int init_player(struct player *player, void *data)
 		avsys_audio_ampoff();
 		return -1;
 	}
-	/* av_volume.level[0] = 5;
+	/* Deleted because avsys_audio_param_t is implemented.
+	   av_volume.level[0] = 5;
 	   av_volume.level[1] = 5;
 
 	   ret = avsys_audio_set_volume_table(
@@ -82,7 +83,8 @@ int init_player(struct player *player, void *data)
 	   avsys_audio_close(av_handle);
 	   avsys_audio_ampoff();
 	   return -1;
-	   } */
+	   } 
+	*/
 
 	return 0;
 }
