@@ -1,0 +1,14 @@
+<manifest>
+  <define>
+    <domain name="boot-animation"/>
+    <request>
+      <smack request="e17::notification" type="rw"/>
+    </request>
+    <permit>
+      <smack permit="pulseaudio" type="rx"/>
+    </permit>
+  </define>
+  <assign>
+    <filesystem path="/usr/bin/boot-animation" label="_" exec_label="none" />
+  </assign>
+</manifest>

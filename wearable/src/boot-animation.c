@@ -72,53 +72,6 @@ static void print_usages(char *argv0)
 	       argv0);
 }
 
-static int fb_init()
-{
-	int fd_fb;
-	struct fb_fix_screeninfo fix;
-	struct fb_var_screeninfo var;
-	void *start;
-	int length;
-
-	fd_fb = open("/dev/fb0", O_RDWR);
-
-	if (fd_fb < 0) {
-		return -1;
-	}
-
-	if (ioctl(fd_fb, FBIOGET_FSCREENINFO, &fix) < 0) {
-		close(fd_fb);
-		return -1;
-	}
-
-	if (ioctl(fd_fb, FBIOGET_VSCREENINFO, &var) < 0) {
-		close(fd_fb);
-		return -1;
-	}
-
-	start = mmap(0, fix.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd_fb, 0);
-	length = var.yres * var.xres * XRGB8888;
-
-	if (start == MAP_FAILED) {
-		munmap(0, fix.smem_len);
-		close(fd_fb);
-		return -1;
-	}
-
-	memset(start, 0, length);
-
-	/* If you want display active area about this plane. plesae using this */
-#if 0
-	var.yoffset = 0;
-	if (ioctl (fd_fb, FBIOPAN_DISPLAY,&var)) {
-		return -1;
-	}
-#endif
-
-	close(fd_fb);
-	return 0;
-}
-
 static int get_wav_file(int state, char *wavpath)
 {
 	char *csc_dir;
@@ -152,7 +105,6 @@ int xready_cb(keynode_t * node, void *user_data)
 	int argc;
 	char **argv;
 	int type = TYPE_UNKNOWN;
-	int clear_type = TYPE_UNKNOWN;
 	int soundon = 1;	/* default sound on */
 	struct args *args = user_data;
 	char wav_path[256];
@@ -196,24 +148,17 @@ int xready_cb(keynode_t * node, void *user_data)
 			type = TYPE_OFF_NOEXIT;
 			continue;
 		case 'm':
+			if (args->msg) continue;
 			type = TYPE_OFF_WITH_MSG;
 			args->msg = strdup(optarg);
 			if (!args->msg)
 				perror("strdup");
-			continue;
-		case 'c':
-			clear_type = TYPE_CLEAR;
 			continue;
 		default:
 			type = TYPE_UNKNOWN;
 			fprintf(stderr, "[Boot-ani] unknown arg [%s]\n", optarg);
 			return EXIT_FAILURE;
 		}
-	}
-
-	if (clear_type == TYPE_CLEAR) {
-		fprintf(stderr, "fb_init\n");
-		fb_init();
 	}
 
 	/* check sound profile */

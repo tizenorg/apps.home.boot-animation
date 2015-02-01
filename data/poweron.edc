@@ -1,0 +1,70 @@
+/*
+ *  boot-animation
+ *
+ * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+images {
+#include "poweron_image.h"
+}
+
+collections {
+	group {
+		name: "poweron";
+
+		parts {
+			part {
+				name: "poweron";
+				mouse_events: 0;
+				description {
+					state: "default" 0.0;
+#if 0	/* for VZW  Looping animation (480*300) */
+/* Method1 */
+					fixed: 1 1;
+					min: 480 300;
+					rel1 { relative: 0.5 0.5; }
+					rel2 { relative: 0.5 0.5; }
+/* Method2 */
+					rel1 { relative: 0, 250/800; }
+					rel2 { relative: 1, 550/800; }
+#endif
+					image {
+#include "poweron_part.h"
+					}
+					visible: 1;
+				}
+			}
+		}
+
+		programs {
+			program {
+				name: "poweron";
+				signal: "show";
+				action: STATE_SET "default" 0.0;
+				target: "poweron";
+				transition: LINEAR 2.2;
+				after: "poweron_end";
+			}
+			program {
+				name: "poweron_end";
+				action: SIGNAL_EMIT "end" "animation";
+			}
+		}
+	}
+}
+

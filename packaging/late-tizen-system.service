@@ -1,0 +1,12 @@
+[Unit]
+Description=Late Tizen System Target
+After=wm_ready.service boot-animation.service
+Before=tizen-system.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sleep 3
+
+[Install]
+WantedBy=tizen-system.target
+

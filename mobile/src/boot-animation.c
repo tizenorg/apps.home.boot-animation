@@ -1,18 +1,19 @@
 /*
-  * Copyright 2012 - 2013  Samsung Electronics Co., Ltd
-  * 
-  * Licensed under the Flora License, Version 1.1 (the License);
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  * 
-  *     http://floralicense.org/license/
-  * 
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an AS IS BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
+ * Copyright (c) 2009-2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 
 #include <stdio.h>
@@ -61,45 +62,6 @@ static void print_usages(char *argv0)
 	       "    # %s --off\n"
 	       "    # %s --offmsg YOUR_MESSAGE\n", argv0, argv0, argv0, argv0,
 	       argv0);
-}
-
-static int fb_init()
-{
-	int fd_fb;
-	struct fb_fix_screeninfo fix;
-	struct fb_var_screeninfo var;
-	void *start;
-	int length;
-
-	fd_fb = open("/dev/fb0", O_RDWR);
-
-	if (fd_fb < 0) {
-		return -1;
-	}
-
-	if (ioctl(fd_fb, FBIOGET_FSCREENINFO, &fix) < 0) {
-		close(fd_fb);
-		return -1;
-	}
-
-	if (ioctl(fd_fb, FBIOGET_VSCREENINFO, &var) < 0) {
-		close(fd_fb);
-		return -1;
-	}
-
-	start = mmap(0, fix.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd_fb, 0);
-	length = var.yres * var.xres * XRGB8888;
-
-	if (start == MAP_FAILED) {
-		munmap(0, fix.smem_len);
-		close(fd_fb);
-		return -1;
-	}
-
-	memset(start, 0, length);
-
-	close(fd_fb);
-	return 0;
 }
 
 static
@@ -151,7 +113,6 @@ void xready_cb(keynode_t * node, void *user_data)
 	char **argv;
 	int option_index = 0;
 	int type = TYPE_UNKNOWN;
-	int clear_type = TYPE_UNKNOWN;
 	int errorcode = -1;
 	int asm_handle;
 	struct args *args = user_data;
@@ -197,13 +158,11 @@ void xready_cb(keynode_t * node, void *user_data)
 			type = TYPE_OFF_NOEXIT;
 			break;
 		case 'm':
+			if (args->msg) continue;
 			type = TYPE_OFF_WITH_MSG;
 			args->msg = strdup(optarg);
 			if (!args->msg)
 				perror("strdup");
-			break;
-		case 'c':
-			clear_type = TYPE_CLEAR;
 			break;
 		default:
 			type = TYPE_UNKNOWN;
@@ -214,11 +173,6 @@ void xready_cb(keynode_t * node, void *user_data)
 	if (type == TYPE_UNKNOWN) {
 		fprintf(stderr, "[Boot-ani] unknown arg [%s]\n", argv[1]);
 		return;
-	}
-
-	if (clear_type == TYPE_CLEAR) {
-		fprintf(stderr, "fb_init\n");
-		fb_init();
 	}
 
 	init_animation(type, args->msg);
