@@ -1,0 +1,8 @@
+[Unit]
+Description=Shutdown Animation
+DefaultDependencies=no
+Before=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/boot-animation --offmsg " " --clear

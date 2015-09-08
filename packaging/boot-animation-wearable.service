@@ -1,0 +1,13 @@
+[Unit]
+Description=Boot Animation
+After=tizen-boot.target sound-server.service pulseaudio.service sound-init.service system-server.service
+Before=tizen-system.target
+ConditionPathExists=!/tmp/restart
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/boot-animation --start
+ExecStart=/bin/sleep 1
+
+[Install]
+WantedBy=tizen-system.target

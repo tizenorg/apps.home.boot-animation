@@ -1,7 +1,0 @@
-boot-animation (0.3.1-1) unstable; urgency=low
-
-  * apply exclusive in power off with msg
-  * Git: pkgs/b/boot-animation
-  * Tag: boot-animation_0.3.1-1
-
- -- Seungtaek Chung <seungtaek.chung@samsung.com>  Mon, 16 Apr 2012 15:22:20 +0900

@@ -1,27 +1,36 @@
 /*
-  * Copyright 2012  Samsung Electronics Co., Ltd
-  * 
-  * Licensed under the Flora License, Version 1.0 (the License);
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  * 
-  *     http://www.tizenopensource.org/license
-  * 
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an AS IS BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
+ *  boot-animation
+ *
+ * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <linux/fb.h>
+#include <stddef.h>
 #include <unistd.h>
 
 #include <pthread.h>
@@ -35,8 +44,13 @@
 #include <getopt.h>
 #include <boot-animation.h>
 #include <animation.h>
+#include <mm_sound_private.h>
 
 #include <vconf.h>
+
+#include "log.h"
+
+#define XRGB8888 4
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -47,10 +61,12 @@ struct args {
 	char *msg;
 };
 
+static int use_csc_ani;
+
 static void print_usages(char *argv0)
 {
 	printf("Usage) %s {--start|--stop}\n"
-	       "  Ex:\n"
+	       "  Ex:"
 	       "    # %s --start\n"
 	       "    # %s --stop\n"
 	       "    # %s --off\n"
@@ -58,70 +74,58 @@ static void print_usages(char *argv0)
 	       argv0);
 }
 
-static
-void restart_cb(keynode_t * node, void *user_data)
+static int get_wav_file(int state, char *wavpath)
 {
-	char *str;
-	char cmd[128];
-	char msg[256];
-	int type = TYPE_UNKNOWN;
-
-	if (!node) {
-		fprintf(stderr, "Invalid node\n");
-		return;
-	}
-
-	str = vconf_keynode_get_str(node);
-	if (!str) {
-		fprintf(stderr, "Failed to get string\n");
-		return;
-	}
-
-	if (sscanf(str, "%127[^:]:%255s", cmd, msg) != 2) {
-		fprintf(stderr, "Invalid format [%s]\n", str);
-		free(str);
-		return;
-	}
-	free(str);
-
-	if (!strcasecmp(cmd, "start")) {
-		type = TYPE_ON;
-	} else if (!strcasecmp(cmd, "stop")) {
-		type = TYPE_OFF;
-	} else if (!strcasecmp(cmd, "off")) {
-		type = TYPE_OFF_NOEXIT;
-	} else if (!strcasecmp(cmd, "offmsg")) {
-		type = TYPE_OFF_WITH_MSG;
+	char *csc_dir;
+	csc_dir = vconf_get_str(VCONFKEY_CSC_POWER_ANI_FILE_PATH);
+	_D("Wave file PATH : %s", csc_dir);
+	if (state == TYPE_ON) {
+		if (csc_dir && get_use_csc()) {
+			snprintf(wavpath, FILE_PATH_MAX-1, "%s/%s", csc_dir, POWERON_WAV);
+			if (check_csc_data(wavpath, TYPE_CHECK_SOUND) < 0)
+				return -1;
+			else
+				return 0;
+		}
+		snprintf(wavpath, FILE_PATH_MAX-1, "%s", DEFAULT_POWERON_WAV);
 	} else {
-		fprintf(stderr, "Unknown command %s\n", cmd);
+		if (csc_dir && get_use_csc()) {
+			snprintf(wavpath, FILE_PATH_MAX-1, "%s/%s", csc_dir, POWEROFF_WAV);
+			if (check_csc_data(wavpath, TYPE_CHECK_SOUND) < 0)
+				return -1;
+			else
+				return 0;
+		}
+		return -1;
 	}
-
-	restart_animation(type, msg);
+	return 0;
 }
 
 static
-void xready_cb(keynode_t * node, void *user_data)
+int xready_cb(keynode_t * node, void *user_data)
 {
 	int c;
 	int argc;
 	char **argv;
-	int option_index = 0;
 	int type = TYPE_UNKNOWN;
-	int errorcode = -1;
-	int asm_handle;
+	int soundon = 1;	/* default sound on */
 	struct args *args = user_data;
+	char wav_path[256];
 	static struct option long_options[] = {
-		{"start", 0, 0, 's'},
-		{"stop", 0, 0, 'p'},
-		{"off", 0, 0, 'o'},
-		{"offmsg", 1, 0, 'm'},
-		{0, 0, 0, 0},
+		{"start",	no_argument,		0,	's'	},
+		{"stop",	no_argument,		0,	'p'	},
+		{"off",		no_argument,		0,	'o'	},
+		{"offmsg",	required_argument,	0,	'm'	},
+		{"clear",	no_argument,		0,	'c'	},
+		{0,		0,			0,	0	},
 	};
 	static int invoked_flag = 0;
 
+	_D("xready_cb");
+
 	if (invoked_flag == 1) {
-		fprintf(stderr, "Already launched.\n");
-		return;
+		_E("Already launched");
+		return EXIT_FAILURE;
 	}
 
 	invoked_flag = 1;
@@ -129,57 +133,107 @@ void xready_cb(keynode_t * node, void *user_data)
 	argc = args->argc;
 	argv = args->argv;
 
-	nice(NICE_VALUE);
-
-	while (1) {
-		c = getopt_long(argc, argv, "spom:", long_options,
-				&option_index);
-		if (c < 0) {
-			break;
-		} else if (c == 0) {
-			c = long_options[option_index].val;
-		}
+	while ((c = getopt_long(argc, argv, "spom:c", long_options, NULL)) >= 0) {
 
 		switch (c) {
 		case 's':
 			type = TYPE_ON;
-			break;
+			continue;
 		case 'p':
 			type = TYPE_OFF;
-			break;
+			continue;
 		case 'o':
 			type = TYPE_OFF_NOEXIT;
-			break;
+			continue;
 		case 'm':
+			if (args->msg) continue;
 			type = TYPE_OFF_WITH_MSG;
 			args->msg = strdup(optarg);
 			if (!args->msg)
 				perror("strdup");
-			break;
+			continue;
 		default:
 			type = TYPE_UNKNOWN;
-			break;
+			_D("[Boot-ani] unknown arg [%s]", optarg);
+			return EXIT_FAILURE;
 		}
 	}
 
-	if (type == TYPE_UNKNOWN) {
-		fprintf(stderr, "[Boot-ani] unknown arg [%s]\n", argv[1]);
-		return;
+	/* check sound profile */
+	if (vconf_get_bool(VCONFKEY_SETAPPL_SOUND_STATUS_BOOL, &soundon) < 0) {
+		_D("VCONFKEY_SETAPPL_SOUND_STATUS_BOOL ==> FAIL!!");
 	}
 
-	init_animation(type, args->msg);
-	if ((type == TYPE_OFF) || (type == TYPE_OFF_WITH_MSG)) {
-		if (!ASM_register_sound
-		    (-1, &asm_handle, ASM_EVENT_EXCLUSIVE_AVSYSTEM,
-		     ASM_STATE_PLAYING, NULL, NULL, ASM_RESOURCE_NONE,
-		     &errorcode)) {
-			fprintf(stderr, "ASM_register_sound() failed 0x%x\n",
-				errorcode);
-			return;
+	if (init_animation(type, args->msg) != EXIT_SUCCESS) {
+		_D("Exit boot-animation");
+		return EXIT_FAILURE;
+	}
+
+	if (soundon) {
+		if (!get_wav_file(type, wav_path)) {
+			mm_sound_boot_ready(3);
+			mm_sound_boot_play_sound(wav_path);
 		}
 	}
+
+	return EXIT_SUCCESS;
 }
 
+#if 0
+static void _boot_ani_ui_set_scale(void)
+{
+	double root_height = 0.0;
+	double root_width = 0.0;
+	char buf[128] = { 0, };
+	Display *disp;
+	int screen_num;
+
+	disp = XOpenDisplay(NULL);
+	if (disp == NULL)
+		return;
+
+	screen_num = DefaultScreen(disp);
+
+	root_height = DisplayHeight(disp, screen_num);
+	root_width = DisplayWidth(disp, screen_num);
+
+	XCloseDisplay(disp);
+
+	snprintf(buf, sizeof(buf), "%lf", root_height / BA_DEFAULT_WINDOW_H);
+	//snprintf(buf, sizeof(buf), "%lf", root_width / BA_DEFAULT_WINDOW_W);
+	_D("Boot animation scale : [%s]", buf);
+
+	setenv("ELM_SCALE", buf, 1);
+	setenv("SCALE_FACTOR", buf, 1);
+}
+#endif
+
+int check_csc_data(char *filepath, int type)
+{
+	FILE *f;
+	if (!filepath)
+		return -1;
+	f = fopen(filepath, "r");
+
+	if (!f) {
+		_E("File doesn't exist : %s", filepath);
+		return -1;
+	}
+
+	_D("Fount csc file : %s", filepath);
+	fclose(f);
+
+	if (type == TYPE_CHECK_ANI)
+		use_csc_ani = 1;
+	return 0;
+}
+
+int get_use_csc(void)
+{
+	return use_csc_ani;
+}
+
+//int elm_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	struct args args;
@@ -193,11 +247,19 @@ int main(int argc, char *argv[])
 	args.argv = argv;
 	args.msg = NULL;
 
+#if 0
+	_boot_ani_ui_set_scale();
+#endif
+
 	elm_init(argc, argv);
 
-	vconf_notify_key_changed("memory/boot-animation/restart", restart_cb,
-				 NULL);
-	xready_cb(NULL, &args);
+	if (vconf_set_int(VCONFKEY_BOOT_ANIMATION_FINISHED, 0) != 0) {
+		_D("Failed to set finished value to 0\n");
+	}
+	if (xready_cb(NULL, &args) != EXIT_SUCCESS) {
+		vconf_set_int(VCONFKEY_BOOT_ANIMATION_FINISHED, 1);
+		return 1;
+	}
 
 	elm_run();
 
@@ -205,6 +267,7 @@ int main(int argc, char *argv[])
 
 	if (args.msg)
 		free(args.msg);
-	elm_shutdown();
 	return 0;
 }
+
+//ELM_MAIN()
