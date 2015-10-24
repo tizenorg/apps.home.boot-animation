@@ -9,6 +9,7 @@ ConditionKernelCommandLine=|bootmode=silent
 Type=oneshot
 ExecStart=/usr/bin/vconftool set -t int memory/boot_animation/finished 1 -f
 ExecStart=/bin/sleep 3
+SmackProcessLabel=boot-animation
 
 [Install]
 WantedBy=tizen-system.target

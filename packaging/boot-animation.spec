@@ -1,4 +1,15 @@
 #sbs-git:slp/pkgs/b/boot-animation boot-animation 0.2 d1bbca3948e4cdb6b2f9e75f176500f452fe6a33
+
+%if "%{?tizen_profile_name}" == "wearable"
+	%define micro_ani ON
+%else
+	%define micro_ani OFF
+%endif
+
+%if "%{?tizen_profile_name}" == "tv"
+ExcludeArch: %{arm} %ix86 x86_64
+%endif
+
 Name: boot-animation
 Version: 0.3.7
 Release: 7
@@ -21,6 +32,9 @@ BuildRequires: pkgconfig(elementary)
 BuildRequires: pkgconfig(utilX)
 BuildRequires: pkgconfig(vconf)
 BuildRequires: pkgconfig(mm-bootsound)
+BuildRequires: pkgconfig(capi-appfw-preference)
+BuildRequires: pkgconfig(capi-system-info)
+BuildRequires: pkgconfig(capi-system-system-settings)
 
 Requires(post): /usr/bin/vconftool
 
@@ -31,7 +45,6 @@ Shows an animation and plays a sound when the device is booted or shutdown.
 %setup -q
 #%patch0 -p1
 
-
 %build
 %ifarch %{arm}
 %define ARCH arm
@@ -39,19 +52,12 @@ Shows an animation and plays a sound when the device is booted or shutdown.
 %define ARCH emulator
 %endif
 
-
-%if "%{?tizen_profile_name}" == "wearable"
-	%define micro_ani ON
-%else
-	%define micro_ani OFF
-%endif
-
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix} -DUSE_MICRO_ANI=%{micro_ani} -DARCH=%{ARCH} -DTIZEN_PROFILE_NAME=%{tizen_profile_name}
 
 make %{?jobs:-j%jobs}
 
-%install  
-rm -rf %{buildroot}  
+%install
+rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/license
 cp -f LICENSE %{buildroot}/usr/share/license/%{name}
 %make_install
@@ -73,23 +79,27 @@ make clean
 %docs_package
 
 %post
-vconftool  -i set -t int memory/boot_animation/finished 0  -u 5000 -f -s system::vconf_inhouse
 
 
 %files
 %manifest boot-animation.manifest
+/etc/smack/accesses.d/boot-animation.efl
 /usr/share/edje/poweroff.edj
 /usr/share/edje/poweron.edj
+/usr/share/edje/mobile_poweroff1.edj
+/usr/share/edje/mobile_poweron1.edj
+/usr/share/edje/wearable_poweroff.edj
+/usr/share/edje/wearable_poweron.edj
 %if %{?ARCH} == arm
-/usr/share/keysound/poweron.ogg
+/usr/share/sounds/poweron.ogg
 %else
-/usr/share/keysound/poweron.wav
+/usr/share/sounds/poweron.wav
 %endif
 %if %{?ARCH} == emulator
-/usr/share/edje/emul/1X1_poweron.edj
-/usr/share/edje/emul/1X1_poweroff.edj
-/usr/share/edje/emul/3X4_poweron.edj
-/usr/share/edje/emul/3X4_poweroff.edj
+#/usr/share/edje/emul/1X1_poweron.edj
+#/usr/share/edje/emul/1X1_poweroff.edj
+#/usr/share/edje/emul/3X4_poweron.edj
+#/usr/share/edje/emul/3X4_poweroff.edj
 %endif
 /usr/share/license/%{name}
 %{_bindir}/boot-animation

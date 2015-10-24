@@ -5,6 +5,7 @@ After=xorg.target e17.service
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/boot-animation --start
+SmackProcessLabel=boot-animation
 
 [Install]
 WantedBy=core-efl.target

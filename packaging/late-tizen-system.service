@@ -6,6 +6,7 @@ Before=tizen-system.target
 [Service]
 Type=oneshot
 ExecStart=/bin/sleep 3
+SmackProcessLabel=boot-animation
 
 [Install]
 WantedBy=tizen-system.target

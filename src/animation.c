@@ -1,9 +1,5 @@
 /*
- *  boot-animation
- *
- * Copyright (c) 2000 - 2011 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Seungtaek Chung <seungtaek.chung@samsung.com>, Mi-Ju Lee <miju52.lee@samsung.com>, Xi Zhichan <zhichan.xi@samsung.com>
+ * Copyright (c) 2009-2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +34,12 @@
 #include <Ecore_X.h>
 #include <Ecore_X_Atoms.h>
 
-#include <boot-animation.h>
+#include <boot.h>
 #include <animation.h>
 
 #include "log.h"
+
+#define OVER_COUNT 19
 
 static struct animation {
 	Ecore_X_Window focus_win;
@@ -109,6 +107,9 @@ static int check_window_validity(void)
 	struct dirent dentry;
 	int return_code = -1;
 	int ret = -1;
+
+	printf("check window validity");
+
 	dp = opendir(CHECK_LCD);
 	if (!dp) {
 		_E("Failed to get lcd node");
@@ -186,38 +187,39 @@ static void _edje_cb(void *d, Evas_Object * obj, const char *e, const char *s)
 		_end_cb(NULL);
 }
 
+#define DEFAULT_W 480
 static void layout_file_set(int state)
 {
-	char *csc_dir;
-	char edj_path[FILE_PATH_MAX];
-	csc_dir = vconf_get_str(VCONFKEY_CSC_POWER_ANI_FILE_PATH);
-	if (state == TYPE_ON) {
-		if (csc_dir) {
-			snprintf(edj_path, FILE_PATH_MAX-1, "%s/%s", csc_dir, EDJ_ON);
-			if (!check_csc_data(edj_path, TYPE_CHECK_ANI)) {
-				_D("set file : %s", edj_path);
-				elm_layout_file_set(s_animation.layout, edj_path, GRP_ON);
-				return;
-			}
+	_D(">>>Layout file set according to resolution<<<");
+
+	if (s_animation.w < DEFAULT_W) {
+		if (state == TYPE_ON) {
+			_D("Set file: %s", WEARABLE_EDJ_ON);
+			elm_layout_file_set(s_animation.layout, WEARABLE_EDJ_ON, GRP_ON);
+		} else {
+			_D("Set file: %s", WEARABLE_EDJ_OFF);
+			elm_layout_file_set(s_animation.layout, WEARABLE_EDJ_OFF, GRP_OFF);
 		}
-		_D("set file : %s", DEFAULT_EDJ_ON);
-		elm_layout_file_set(s_animation.layout, DEFAULT_EDJ_ON, GRP_ON);
+	} else if (s_animation.w > DEFAULT_W) {
+		if (state == TYPE_ON) {
+			_D("Set file: %s", MOBILE_EDJ_ON);
+			elm_layout_file_set(s_animation.layout, MOBILE_EDJ_ON, GRP_ON);
+		} else {
+			_D("Set file: %s", MOBILE_EDJ_OFF);
+			elm_layout_file_set(s_animation.layout, MOBILE_EDJ_OFF, GRP_OFF);
+		}
 	} else {
-		if (csc_dir) {
-			snprintf(edj_path, FILE_PATH_MAX-1, "%s/%s", csc_dir, EDJ_OFF);
-			if (!check_csc_data(edj_path, TYPE_CHECK_ANI)) {
-				_D("set file : %s", edj_path);
-				elm_layout_file_set(s_animation.layout, edj_path, GRP_OFF);
-				return;
-			}
+		if (state == TYPE_ON) {
+			_D("Set file: %s", DEFAULT_EDJ_ON);
+			elm_layout_file_set(s_animation.layout, DEFAULT_EDJ_ON, GRP_ON);
+		} else {
+			_D("Set file: %s", DEFAULT_EDJ_OFF);
+			elm_layout_file_set(s_animation.layout, DEFAULT_EDJ_OFF, GRP_OFF);
 		}
-		_D("set file : %s", DEFAULT_EDJ_OFF);
-		elm_layout_file_set(s_animation.layout, DEFAULT_EDJ_OFF, GRP_OFF);
 	}
 }
 
-static
-int init_layout(const char *msg)
+static int init_layout(const char *msg)
 {
 	s_animation.layout = elm_layout_add(s_animation.win);
 	if (!s_animation.layout) {
@@ -230,20 +232,12 @@ int init_layout(const char *msg)
 	evas_object_size_hint_weight_set(s_animation.layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	_D("[Boot-ani] Start animation: %d mode", s_animation.state);
 	elm_win_resize_object_add(s_animation.win, s_animation.layout);
-	edje_object_signal_callback_add(elm_layout_edje_get(s_animation.layout),
-					"end", "animation", _edje_cb, NULL);
+	edje_object_signal_callback_add(elm_layout_edje_get(s_animation.layout), "end", "animation", _edje_cb, NULL);
 	evas_object_show(s_animation.layout);
-
-#if 1				/* to FIXME to hide indicator */
-	Ecore_X_Window xwin;
-	xwin = elm_win_xwindow_get(s_animation.win);
-	ecore_x_icccm_hints_set(xwin, 0, 0, 0, 0, 0, 0, 0);
-#endif
 
 	if (msg) {
 		if (!s_animation.txt) {
-			s_animation.txt =
-			    evas_object_text_add(s_animation.evas);
+			s_animation.txt = evas_object_text_add(s_animation.evas);
 			if (!s_animation.txt) {
 				_E("Failed to add text");
 				evas_object_del(s_animation.layout);
@@ -258,8 +252,7 @@ int init_layout(const char *msg)
 	return EXIT_SUCCESS;
 }
 
-static
-void fini_layout(void)
+static void fini_layout(void)
 {
 	if (s_animation.layout) {
 		evas_object_del(s_animation.layout);
@@ -271,19 +264,23 @@ void fini_layout(void)
 	}
 }
 
-static
-int create_window(void)
+static int create_window(void)
 {
-	s_animation.win = elm_win_add(NULL, "", ELM_WIN_BASIC);
+	_D("Create Window");
+	printf("Create window\n");
+
+	int x, y = 0;
+
+	s_animation.win = elm_win_add(NULL, "", ELM_WIN_NOTIFICATION);
 	if (!s_animation.win) {
 		_E("Failed to create a new window");
 		return EXIT_FAILURE;
 	}
-	if (s_animation.state == TYPE_OFF || s_animation.state == TYPE_OFF_WITH_MSG)
+	if (s_animation.state == TYPE_OFF || s_animation.state == TYPE_OFF_WITH_MSG) {
+		_D("We are turning off the Tizen");
 		elm_win_alpha_set(s_animation.win, EINA_TRUE);
-	evas_object_smart_callback_add(s_animation.win, "delete-request",
-				       win_del, NULL);
-	evas_object_resize(s_animation.win, s_animation.w, s_animation.h);
+	}
+	evas_object_smart_callback_add(s_animation.win, "delete-request", win_del, NULL);
 
 	s_animation.evas = evas_object_evas_get(s_animation.win);
 	if (!s_animation.evas) {
@@ -291,7 +288,11 @@ int create_window(void)
 		_E("Failed to get the evas object");
 		return EXIT_FAILURE;
 	}
+	elm_win_screen_size_get(s_animation.win, &x, &y, &s_animation.w, &s_animation.h);
+	_D("Window size is x: %d, y: %d, w: %d, h: %d", x, y, s_animation.w, s_animation.h);
+	printf("window size is x: %d, y: %d, w: %d, h: %d\n", x, y, s_animation.w, s_animation.h);
 	elm_win_borderless_set(s_animation.win, 1);
+	elm_win_indicator_mode_set(s_animation.win, ELM_WIN_INDICATOR_HIDE);
 	evas_object_move(s_animation.win, 0, 0);
 
 	if (s_animation.w > s_animation.h) {
@@ -302,6 +303,7 @@ int create_window(void)
 		s_animation.w = s_animation.h;
 		s_animation.h = t;
 	}
+
 	evas_object_show(s_animation.win);
 
 	s_animation.ee = ecore_evas_ecore_evas_get(s_animation.evas);
@@ -312,31 +314,49 @@ int create_window(void)
 	}
 
 	s_animation.xwin = ecore_evas_window_get(s_animation.ee);
-	ecore_x_netwm_window_type_set(s_animation.xwin,
-				      ECORE_X_WINDOW_TYPE_NOTIFICATION);
-	utilx_set_system_notification_level(ecore_x_display_get(),
-				    s_animation.xwin,
-				    UTILX_NOTIFICATION_LEVEL_HIGH);
-
-	/* hide indicator during drawing animation */
-	elm_win_indicator_mode_set(s_animation.win, ELM_WIN_INDICATOR_HIDE);
+	utilx_set_system_notification_level(ecore_x_display_get(), s_animation.xwin, UTILX_NOTIFICATION_LEVEL_HIGH);
 
 	return EXIT_SUCCESS;
 }
 
+static Eina_Bool _count_for_xorg_timer_cb(void *data)
+{
+	int ret = 0;
+	static int count = 0;
+
+	ret = access(CHECK_Xorg, F_OK);
+	if (ret == 0) {
+		if (init_layout(data) == EXIT_FAILURE) {
+			_E("Failed to init the layout object");
+			if (data) {
+				evas_object_del(s_animation.txt);
+			}
+			evas_object_del(s_animation.win);
+		}
+		count = 0;
+		return ECORE_CALLBACK_CANCEL;
+	}
+	if (count > OVER_COUNT) {
+		_E("Getting Xorg is delaying, Something is wrong");
+	}
+	count ++;
+
+	return ECORE_CALLBACK_RENEW;
+}
+
 int init_animation(int state, const char *msg)
 {
-	int ret, count = 0;
+	_D("Init animation");
+	printf("Init animation\n");
+
+	Ecore_Timer *timer = NULL;
+
 	if (check_window_validity()) {
 		_E("Failed to access LCD");
 		return EXIT_FAILURE;
 	}
 
-	s_animation.focus_win = ecore_x_window_focus_get();
-	s_animation.root_win = ecore_x_window_root_get(s_animation.focus_win);
 	s_animation.state = state;
-	ecore_x_window_size_get(s_animation.root_win, &s_animation.w,
-				&s_animation.h);
 
 	if (create_window() == EXIT_FAILURE) {
 		_E("Failed to create a new window");
@@ -344,19 +364,9 @@ int init_animation(int state, const char *msg)
 	}
 
 	/* waiting initialzing Xorg process during 2 seconds */
-	while (count != 20) {
-		ret = access(CHECK_Xorg, F_OK);
-		if (ret == 0)
-			break;
-		usleep(100*1000);
-		count++;
-	}
-
-	if (init_layout(msg) == EXIT_FAILURE) {
-		_E("Failed to init the layout object");
-		if (msg)
-			evas_object_del(s_animation.txt);
-		evas_object_del(s_animation.win);
+	timer = ecore_timer_add(0.1f, _count_for_xorg_timer_cb, msg);
+	if (!timer) {
+		_E("Critical Error");
 		return EXIT_FAILURE;
 	}
 
@@ -367,5 +377,7 @@ int fini_animation(void)
 {
 	fini_layout();
 	evas_object_del(s_animation.win);
+	fflush(stdout);
+	close(1);
 	return EXIT_SUCCESS;
 }

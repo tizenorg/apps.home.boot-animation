@@ -1,7 +1,0 @@
-INCLUDES=include
-SRC+=test.c
-SRC+=src/wav_parser.c
-CFLAGS+=-D_DEBUG
-CFLAGS+=-I${INCLUDES}
-all: test.c src/wav_parser.c
-	@gcc ${CFLAGS} ${SRC} `pkg-config avsysaudio --cflags --libs` -o test

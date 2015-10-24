@@ -6,3 +6,4 @@ Before=shutdown.target
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/boot-animation --offmsg " " --clear
+SmackProcessLabel=boot-animation

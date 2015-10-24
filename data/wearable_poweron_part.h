@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2009-2015 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+ normal:"TIZEN_W_Power_on/Tizen_power_on_01.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_01.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_02.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_03.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_04.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_05.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_06.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_07.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_08.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_09.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_10.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_11.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_12.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_13.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_14.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_15.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_16.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_17.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_18.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_19.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_20.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_21.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_22.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_23.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_24.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_25.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_26.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_27.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_28.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_29.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_30.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_31.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_32.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_33.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_34.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_35.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_36.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_37.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_38.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_39.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_40.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_41.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_42.png";
+ tween:"TIZEN_W_Power_on/Tizen_power_on_43.png";

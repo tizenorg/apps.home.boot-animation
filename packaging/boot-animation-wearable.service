@@ -8,6 +8,7 @@ ConditionPathExists=!/tmp/restart
 Type=oneshot
 ExecStart=/usr/bin/boot-animation --start
 ExecStart=/bin/sleep 1
+SmackProcessLabel=boot-animation
 
 [Install]
 WantedBy=tizen-system.target

@@ -1,14 +1,10 @@
 <manifest>
   <define>
     <domain name="boot-animation"/>
-    <request>
-      <smack request="e17::notification" type="rw"/>
-    </request>
-    <permit>
-      <smack permit="pulseaudio" type="rx"/>
-    </permit>
   </define>
   <assign>
-    <filesystem path="/usr/bin/boot-animation" label="_" exec_label="none" />
+    <filesystem path="/usr/bin/boot-animation" label="boot-animation" exec_label="boot-animation" />
+    <filesystem path="/usr/share/sounds/poweron.ogg" label="_" />
+    <filesystem path="/usr/share/sounds/poweron.wav" label="_" />
   </assign>
 </manifest>
